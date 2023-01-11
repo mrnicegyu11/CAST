@@ -231,7 +231,12 @@ public:
       {
         const double eigenval_in_si = Config::get().entropy.entropy_mw_use_si_units ? eigenvalues(i, 0u) : eigenvalues(i, 0u)*std::pow(\
           std::pow(10.,-10)*std::sqrt(constants::u2kg),2);
-        pca_frequencies(i, 0u) = sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenval_in_si);
+        pca_frequencies(i, 0u) = std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenval_in_si);
+        if (std::isnan(pca_frequencies(i, 0u)))
+        {
+          // likely eigenval_in_si is close to zero or zero
+          pca_frequencies(i, 0u) = std::numeric_limits<double>::max();
+        }
         if (!(massVector_in.cols() == 1u && massVector_in.rows() == eigenvalues.rows()))
         {
           throw(std::runtime_error("Matrix dimension missmatch, aborting!"));
@@ -269,7 +274,7 @@ public:
         const double& squaredStdDev = eigenvalues(i, 0u);
         //std::cout << "Debug: squaredStdDev (convoluted with red mass) " << squaredStdDev << std::endl;
         //
-        const double stdDev_ofPCAMode_inSIUnits = std::sqrt(squaredStdDev) / std::sqrt(red_mass);
+        const double stdDev_ofPCAMode_inSIUnits = std::isnan(std::sqrt(squaredStdDev) / std::sqrt(red_mass)) ? 0. : std::sqrt(squaredStdDev) / std::sqrt(red_mass);
         //std::cout << "SDEBUG: sqrt(" << squaredStdDev << ")/sqrt(" << red_mass << ")= " << stdDev_ofPCAMode_inSIUnits << std::endl;
         //const double x_0 = stdDev_ofPCAMode_inSIUnits * std::sqrt(2);
         const double x_0_SI = stdDev_ofPCAMode_inSIUnits * std::sqrt(2);
@@ -286,13 +291,21 @@ public:
         //C=k*(ln((k*temp)/h_red/freq*2/pi/x_0) + 1)
         //C_dash = C * avogadro
         
-        alpha_i(i, 0u) = constants::h_bar_SI_units / (sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * sqrt(eigenval_in_si));
+        alpha_i(i, 0u) = constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * std::sqrt(eigenval_in_si));
+        if (std::isnan(alpha_i(i, 0u)))
+        {
+          alpha_i(i, 0u) = 0.;
+        }
         //const double sanityCheck = constants::h_bar_SI_units * pca_frequencies(i, 0u) / constants::boltzmann_constant_kb_SI_units / temperatureInK;
         //std::cout << "Debug: sanitycheck " << sanityCheck << std::endl;
         //These are in units S/k_B (therefore: not multiplied by k_B)
-        quantum_entropy(i, 0u) = ((alpha_i(i, 0u) / (exp(alpha_i(i, 0u)) - 1)) - log(1 - exp(-1 * alpha_i(i, 0u)))) * 1.380648813 * 6.02214129 * 0.239005736; // in cal/(mol*K)
-        statistical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (log(alpha_i(i, 0u)) -/*this might be plus or minus?!*/ log(sqrt(2. * constants::pi * 2.71828182845904523536)));
-        classical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (log(alpha_i(i, 0u)) - 1.); // should this be +1??? // The formula written HERE NOW is correct, there is a sign error in the original pape rof Knapp/numata
+        quantum_entropy(i, 0u) = ((alpha_i(i, 0u) / (std::exp(alpha_i(i, 0u)) - 1)) - std::log(1 - std::exp(-1 * alpha_i(i, 0u)))) * 1.380648813 * 6.02214129 * 0.239005736; // in cal/(mol*K)
+        if (std::isnan(quantum_entropy(i, 0u)))
+        {
+          quantum_entropy(i, 0u) = 0.;
+        }
+        statistical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (std::log(alpha_i(i, 0u)) -/*this might be plus or minus?!*/ log(sqrt(2. * constants::pi * 2.71828182845904523536)));
+        classical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (std::log(alpha_i(i, 0u)) - 1.); // should this be +1??? // The formula written HERE NOW is correct, there is a sign error in the original pape rof Knapp/numata
         const double C3 = classical_entropy(i, 0u) - gaussianSSpatial;
         constant_C(i, 0u) = C3;
         if (Config::get().general.verbosity > 4)

@@ -1231,8 +1231,8 @@ int main(int argc, char** argv)
               const double eigenval = 1.0/(pcaFrequencies(i,0u)* pcaFrequencies(i, 0u)/ constants::boltzmann_constant_kb_SI_units/curTemp);
               const double alpha_i = constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * curTemp) * std::sqrt(eigenval));
               const double quantumS = ((alpha_i / (std::exp(alpha_i) - 1)) - std::log(1 - std::exp(-1 * alpha_i))) * 1.380648813 * 6.02214129 * 0.239005736;
-              quantum_entropy(i, 0u) = quantumS;
-              classical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (log(alpha_i) - 1.); 
+              quantum_entropy(i, 0u) = std::isnan(quantumS) ? 0. : quantumS;
+              classical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (std::log(alpha_i) - 1.); 
               // The formula written HERE ABOVE NOW is correct, there is a sign error in the original paper of Knapp/numata
             }
             //
