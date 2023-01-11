@@ -1218,7 +1218,7 @@ int main(int argc, char** argv)
             Matrix_Class classical_entropy(pcaFrequencies.rows(), 1u);
             const Matrix_Class pcaModes_t = transposed(pcaModes);
             std::vector<double> andersonDarlingValues = entropy::normalityCheck(pcaModes_t,pcaFrequencies.rows());
-            if (Config::get().general.verbosity)
+            if (Config::get().general.verbosity > 4)
             {
               std::cout << "Andersen-Darlin Test Values for each mode:\n";
               for (auto const& i : andersonDarlingValues)
@@ -1270,6 +1270,16 @@ int main(int argc, char** argv)
 
                   }
                   entropyVal += quantum_entropy(i, 0u);
+                }
+                else
+                {
+                  //Mode is treated using kNN
+                  accumulateShiftings += shiftingConstants(i, 0u);
+                  if (Config::get().general.verbosity > 3)
+                    std::cout << "Add shift: " << shiftingConstants(i, 0u) << "\n";
+                  //std::cout << "Add classical_entropy: " << classical_entropy(i, 0u) << "\n";
+                  //std::cout << "Add quantum_entropy: " << quantum_entropy(i, 0u) << "\n";
+                  entropyOfIncludedDimsInQHA += quantum_entropy(i, 0u);
                 }
               }
               else if(std::any_of(Config::get().entropy.purgeModesInCompositeProcedure.begin(), Config::get().entropy.purgeModesInCompositeProcedure.end(), [&](const size_t& elem) { return elem == i; }))
