@@ -307,11 +307,11 @@ public:
         standardDeviation += (drawMatrix(n, 0) - mean) * (drawMatrix(n, 0) - mean);
 
       standardDeviation /= numberOfDraws;
-      standardDeviation = sqrt(standardDeviation);
+      standardDeviation = std::sqrt(standardDeviation);
       std::cout << "Mean of Empirical Gaussian: " << mean << "\n";
       std::cout << "Standard Deviation of Empricial Gaussian: " << standardDeviation << std::endl;
 
-      empiricalNormalDistributionEntropy = log(standardDeviation * sqrt(2. * pi * e));
+      empiricalNormalDistributionEntropy = log(standardDeviation * std::sqrt(2. * pi * e));
     }
     else
     {
@@ -487,15 +487,15 @@ public:
     float_type entropy_sho = 0;
     for (std::size_t i = 0; i < eigenvaluesPCA.rows(); i++)
     {
-      pca_frequencies(i, 0u) = sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenvaluesPCA(i, 0u));
-      alpha_i(i, 0u) = constants::h_bar_SI_units / (sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * sqrt(eigenvaluesPCA(i, 0u)));
+      pca_frequencies(i, 0u) = std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenvaluesPCA(i, 0u));
+      alpha_i(i, 0u) = constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * std::sqrt(eigenvaluesPCA(i, 0u)));
       std::cout << "Debug: alpha_i " << alpha_i(i, 0u) << std::endl;
       const double sanityCheck = constants::h_bar_SI_units * pca_frequencies(i, 0u) / constants::boltzmann_constant_kb_SI_units / temperatureInK;
       std::cout << "Debug: sanitycheck " << sanityCheck << std::endl;
       //These are in units S/k_B (therefore: not multiplied by k_B)
-      quantum_entropy(i, 0u) = ((alpha_i(i, 0u) / (exp(alpha_i(i, 0u)) - 1)) - log(1 - exp(-1 * alpha_i(i, 0u))));
+      quantum_entropy(i, 0u) = ((alpha_i(i, 0u) / (std::exp(alpha_i(i, 0u)) - 1)) - std::log(1 - std::exp(-1 * alpha_i(i, 0u))));
       std::cout << "Debug: quantum_entropy " << quantum_entropy(i, 0u) << std::endl;
-      statistical_entropy(i, 0u) = -1.0 * (log(alpha_i(i, 0u)) -/*this might be plus or minus?!*/ log(sqrt(2. * constants::pi * 2.71828182845904523536)));
+      statistical_entropy(i, 0u) = -1.0 * (std::log(alpha_i(i, 0u)) -/*this might be plus or minus?!*/ std::log(std::sqrt(2. * constants::pi * 2.71828182845904523536)));
       if (this->subDims == std::vector<size_t>() || std::find(this->subDims.begin(), this->subDims.end(), i) != this->subDims.end())
       {
         if (!std::isnan(quantum_entropy(i, 0u)))
@@ -1173,7 +1173,7 @@ private:
 
         if (norm == kNN_NORM::EUCLEDEAN)
         {
-          const float_type holdNNdistanceEucl = sqrt(entropy::knn_distance_eucl_squared(copytemp, rowIndices.size(), kNN, rowQueryPts, i, buffer));
+          const float_type holdNNdistanceEucl = std::sqrt(entropy::knn_distance_eucl_squared(copytemp, rowIndices.size(), kNN, rowQueryPts, i, buffer));
           eucl_kNN_distances(0, i) = holdNNdistanceEucl;
 
           if (ardakaniCorrection)

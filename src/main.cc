@@ -1199,7 +1199,6 @@ int main(int argc, char** argv)
         // Custom kNN with purged modes
         if (m == 9 || m == 0)
         {
-          double value = 0.;
           if (Config::get().entropy.entropy_use_massweighted)
           {
             entropyobj curTinker = entropyobj(entropyobj_mw);
@@ -1237,7 +1236,6 @@ int main(int argc, char** argv)
             }
             //
             double entropyVal = 0.;
-            double ClassicalEntropyVal = 0.;
             double entropyOfIncludedDimsInQHA = 0.;
             double accumulateShiftings = 0.;
             for (int i = pcaFrequencies.rows() - 1; i >= 0 ; i=i-1)
@@ -1673,7 +1671,6 @@ int main(int argc, char** argv)
       output << coords;
       break;
     }
-
     case config::tasks::EXCITONDIMER:
     {
       exciD::dimexc(Config::get().exbreak.masscenters, Config::get().exbreak.couplings, Config::get().exbreak.pscnumber, Config::get().exbreak.nscnumber,
