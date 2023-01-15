@@ -231,7 +231,7 @@ public:
       {
         const double eigenval_in_si = Config::get().entropy.entropy_mw_use_si_units ? eigenvalues(i, 0u) : eigenvalues(i, 0u)*std::pow(\
           std::pow(10.,-10)*std::sqrt(constants::u2kg),2);
-        pca_frequencies(i, 0u) = std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenval_in_si);
+        pca_frequencies(i, 0u) = 1. / (2*constants::pi) * std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK / eigenval_in_si);
         if (std::isnan(pca_frequencies(i, 0u)))
         {
           // likely eigenval_in_si is close to zero or zero
@@ -291,7 +291,7 @@ public:
         //C=k*(ln((k*temp)/h_red/freq*2/pi/x_0) + 1)
         //C_dash = C * avogadro
         
-        alpha_i(i, 0u) = constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * std::sqrt(eigenval_in_si));
+        alpha_i(i, 0u) = 1. / (2*constants::pi) * constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * temperatureInK) * std::sqrt(eigenval_in_si));
         if (std::isnan(alpha_i(i, 0u)))
         {
           alpha_i(i, 0u) = 0.;

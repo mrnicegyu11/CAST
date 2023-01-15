@@ -1227,8 +1227,7 @@ int main(int argc, char** argv)
             
             for (std::size_t i = 0; i < quantum_entropy.rows(); i++)
             {
-              const double eigenval = 1.0/(pcaFrequencies(i,0u)* pcaFrequencies(i, 0u)/ constants::boltzmann_constant_kb_SI_units/curTemp);
-              const double alpha_i = constants::h_bar_SI_units / (std::sqrt(constants::boltzmann_constant_kb_SI_units * curTemp) * std::sqrt(eigenval));
+              const double alpha_i = constants::h_bar_SI_units * pcaFrequencies(i,0u)  / (constants::boltzmann_constant_kb_SI_units * curTemp);
               const double quantumS = ((alpha_i / (std::exp(alpha_i) - 1)) - std::log(1 - std::exp(-1 * alpha_i))) * 1.380648813 * 6.02214129 * 0.239005736;
               quantum_entropy(i, 0u) = std::isnan(quantumS) ? 0. : quantumS;
               classical_entropy(i, 0u) = -1.0 * constants::N_avogadro * constants::boltzmann_constant_kb_SI_units * constants::joules2cal * (std::log(alpha_i) - 1.); 
@@ -1277,7 +1276,7 @@ int main(int argc, char** argv)
                     std::cout << "Add shift: " << shiftingConstants(i, 0u) << "\n";
                   //std::cout << "Add classical_entropy: " << classical_entropy(i, 0u) << "\n";
                   //std::cout << "Add quantum_entropy: " << quantum_entropy(i, 0u) << "\n";
-                  entropyOfIncludedDimsInQHA += quantum_entropy(i, 0u);
+                    entropyOfIncludedDimsInQHA += quantum_entropy(i, 0u);
                 }
               }
               else if(std::any_of(Config::get().entropy.purgeModesInCompositeProcedure.begin(), Config::get().entropy.purgeModesInCompositeProcedure.end(), [&](const size_t& elem) { return elem == i; }))
@@ -1305,7 +1304,7 @@ int main(int argc, char** argv)
             // 
             // perform quasi-harmonic scaling
             // run harmoizedScaling
-            // run kNN
+            // run kNN``
             // 
             // establish additive entropies
             //
@@ -1313,6 +1312,11 @@ int main(int argc, char** argv)
             std::cout << "Entropy of quasi-harmonicly treated modes: " << entropyVal << " cal/(mol*K)\n";
             std::cout << "Accumulated Shiftings: " << accumulateShiftings << "\n";
             calculatedentropyobj const calcObj = calculatedentropyobj(Config::get().entropy.entropy_method_knn_k, entropyobj_mw);
+            if (pcaModes.rows() == 0u)
+            {
+              std::cout << "Dimensionality is zero. No modes left to calculate kNN entropy. Exiting...\n";
+              exit(0);
+            }
             const double kNNentropyVal = calcObj.calculateNN(transposed(pcaModes), norm, false, kNN_FUNCTION::HNIZDO);
             std::cout << std::fixed;
             std::cout << "Full-Dimensional kNN entropy of remaining modes: " << kNNentropyVal + accumulateShiftings << " cal/(mol*K)\n";
